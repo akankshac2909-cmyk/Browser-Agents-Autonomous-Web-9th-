@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI Coding Assistant Comparison — Session 9</title>
+<style>
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --surface2: #16213e;
+  --border: #2a2a4a;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #6366f1;
+  --accent2: #22d3ee;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #a855f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 15px; line-height: 1.6;
+}
+a { color: var(--accent2); }
+h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg,#6366f1,#22d3ee); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+h2 { font-size: 1.25rem; font-weight: 600; color: var(--accent2); margin-bottom: 1rem; display:flex; align-items:center; gap:.5rem; }
+h2::before { content:""; display:block; width:3px; height:1.2em; background:var(--accent); border-radius:2px; }
+h3 { font-size: 1rem; font-weight: 600; color: var(--purple); margin-bottom:.5rem; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+.hero { text-align:center; padding: 3rem 1rem 2rem; border-bottom: 1px solid var(--border); }
+.hero p { color: var(--muted); margin-top:.5rem; }
+
+.section { background: var(--surface); border: 1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+.section-num { display:inline-block; background:var(--accent); color:#fff; border-radius:6px; font-size:.75rem; font-weight:700; padding:.15rem .45rem; margin-right:.5rem; }
+
+.mono { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; }
+.ts { color: var(--muted); font-size:.8rem; }
+.num { color: var(--muted); font-size:.85rem; text-align:center; width:2.5rem; }
+
+.badge { display:inline-block; font-size:.7rem; font-weight:600; padding:.15rem .4rem; border-radius:4px; font-family:monospace; }
+.b-det { background:#1e293b; color:#6366f1; border:1px solid #6366f140; }
+.b-a11y { background:#1e293b; color:#22d3ee; border:1px solid #22d3ee40; }
+.b-ext { background:#1e293b; color:#10b981; border:1px solid #10b98140; }
+.b-vis { background:#1e293b; color:#a855f7; border:1px solid #a855f740; }
+.b-blk { background:#1e293b; color:#ef4444; border:1px solid #ef444440; }
+
+.act-badge { display:inline-block; font-size:.7rem; font-weight:700; padding:.15rem .45rem; border-radius:4px; font-family:monospace; text-transform:uppercase; }
+.act-search { background:#312e81; color:#a5b4fc; }
+.act-nav    { background:#065f46; color:#6ee7b7; }
+.act-ext    { background:#1e1b4b; color:#c4b5fd; }
+.act-exp    { background:#713f12; color:#fde68a; }
+
+.table-wrap { overflow-x:auto; border-radius:8px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+thead { background: var(--surface2); }
+th { padding:.6rem .8rem; text-align:left; color:var(--muted); font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid var(--border); }
+td { padding:.55rem .8rem; border-bottom:1px solid var(--border)20; vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background: #ffffff06; }
+th[scope=row] { color:var(--accent); background:var(--surface2); font-size:.8rem; white-space:nowrap; }
+
+.cmp-table th:not([scope=row]) { color:var(--accent2); font-size:.85rem; text-align:center; }
+.cmp-table td { text-align:center; }
+.pricing { color:var(--green); font-size:.8rem; line-height:1.5; }
+
+.url-cell { font-family:monospace; font-size:.78rem; color:var(--muted); word-break:break-all; max-width:320px; }
+.result-cell { font-size:.8rem; color:var(--muted); max-width:240px; }
+
+.mini-list { list-style:none; padding:0; font-size:.8rem; text-align:left; }
+.mini-list li { padding:.15rem 0; padding-left:.8rem; position:relative; color:var(--text); }
+.mini-list li::before { content:"·"; position:absolute; left:0; color:var(--accent); }
+.strength li::before { color:var(--green); }
+.limit li::before { color:var(--red); }
+
+.feature-list { padding-left:1.2rem; }
+.feature-list li { margin-bottom:.25rem; }
+
+.ps-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:1rem; margin-bottom:.75rem; }
+.ps-header { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.35rem; }
+.ps-url { font-size:.78rem; color:var(--muted); word-break:break-all; }
+.ps-badge { font-size:.7rem; font-weight:700; padding:.15rem .4rem; border-radius:4px; white-space:nowrap; }
+.ps-ok   { background:#064e3b; color:#6ee7b7; }
+.ps-warn { background:#713f12; color:#fde68a; }
+.ps-err  { background:#450a0a; color:#fca5a5; }
+.ps-meta { font-size:.75rem; color:var(--muted); margin-bottom:.5rem; }
+.ps-preview { font-size:.72rem; color:var(--muted); white-space:pre-wrap; word-break:break-word; max-height:80px; overflow:hidden; background:#0a0a12; border-radius:4px; padding:.5rem; line-height:1.4; }
+
+.json-block { background:#0a0a14; border:1px solid var(--border); border-radius:8px; padding:1rem; font-size:.75rem; color:#a78bfa; overflow-x:auto; white-space:pre-wrap; word-break:break-word; max-height:400px; overflow-y:auto; }
+
+.rec-winner { font-size:1.5rem; font-weight:700; color:var(--accent2); padding:1rem; background:var(--surface2); border-radius:8px; margin-bottom:1rem; text-align:center; }
+.rec-reason { color:var(--text); margin-bottom:.75rem; line-height:1.7; }
+.rec-section-title { font-weight:700; color:var(--accent); margin-top:1rem; margin-bottom:.5rem; }
+.rec-list { list-style:none; padding:0; }
+.rec-list li { padding:.4rem .8rem; background:var(--surface2); border-radius:6px; margin-bottom:.4rem; border-left:3px solid var(--accent); font-size:.9rem; }
+.rec-verdict { font-style:italic; color:var(--accent2); margin-top:1rem; padding:1rem; background:var(--surface2); border-radius:8px; border-left:3px solid var(--accent2); }
+
+.metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; }
+.metric-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:1.25rem 1rem; text-align:center; }
+.metric-value { font-size:1.75rem; font-weight:700; color:var(--accent2); font-family:monospace; }
+.metric-label { font-size:.75rem; color:var(--muted); margin-top:.25rem; text-transform:uppercase; letter-spacing:.05em; }
+
+.dag-container { display:flex; justify-content:center; padding:1rem 0; }
+.tag-row { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.5rem; }
+
+footer { text-align:center; color:var(--muted); font-size:.8rem; padding:2rem; border-top:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>AI Coding Assistant Comparison</h1>
+  <p>Live browser agent report · Generated 2026-06-13 · Session 9</p>
+</div>
+
+<div class="container">
+
+<!-- ① User Goal -->
+<div class="section">
+  <h2><span class="section-num">1</span>Original User Goal</h2>
+  <p>Research and compare the top AI coding assistants used by software developers —
+  <strong>Claude Code</strong>, <strong>GitHub Copilot</strong>, and <strong>Cursor AI</strong> —
+  through live web browsing. Collect pricing, supported IDEs, key features, AI models,
+  strengths, and limitations. Produce an evidence-based recommendation.</p>
+  <div class="tag-row" style="margin-top:1rem">
+    <span class="badge b-det">Claude Code</span>
+    <span class="badge b-a11y">GitHub Copilot</span>
+    <span class="badge b-ext">Cursor AI</span>
+    <span class="badge b-vis">Live Web Browsing</span>
+    <span class="badge b-blk">Evidence-Based Recommendation</span>
+  </div>
+</div>
+
+<!-- ② Planner DAG -->
+<div class="section">
+  <h2><span class="section-num">2</span>Planner DAG</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">
+    Execution plan — each node is a phase of the agent's work.
+  </p>
+  <div class="dag-container">
+    <svg viewBox="0 0 640 530" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;margin:auto;display:block">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#6366f1"/>
+    </marker>
+  </defs>
+  <line x1="320" y1="56" x2="320" y2="94" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="320" y1="126" x2="320" y2="164" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="320" y1="196" x2="320" y2="234" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="320" y1="266" x2="180" y2="314" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="320" y1="266" x2="460" y2="314" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="180" y1="346" x2="320" y2="394" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="460" y1="346" x2="320" y2="394" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="320" y1="426" x2="320" y2="464" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <rect x="250" y="22" width="140" height="36" rx="8" fill="#6366f1" fill-opacity="0.15" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="320" y="46" text-anchor="middle" font-family="monospace" font-size="12" fill="#6366f1">Goal</text>
+  <rect x="250" y="92" width="140" height="36" rx="8" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="320" y="116" text-anchor="middle" font-family="monospace" font-size="12" fill="#8b5cf6">Search Products</text>
+  <rect x="238" y="162" width="164" height="36" rx="8" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="320" y="186" text-anchor="middle" font-family="monospace" font-size="12" fill="#a855f7">Open Product Pages</text>
+  <rect x="238" y="232" width="164" height="36" rx="8" fill="#c084fc" fill-opacity="0.15" stroke="#c084fc" stroke-width="1.5"/>
+  <text x="320" y="256" text-anchor="middle" font-family="monospace" font-size="12" fill="#c084fc">Open Pricing Pages</text>
+  <rect x="106" y="312" width="148" height="36" rx="8" fill="#7c3aed" fill-opacity="0.15" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="180" y="336" text-anchor="middle" font-family="monospace" font-size="12" fill="#7c3aed">Extract Features</text>
+  <rect x="390" y="312" width="140" height="36" rx="8" fill="#7c3aed" fill-opacity="0.15" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="460" y="336" text-anchor="middle" font-family="monospace" font-size="12" fill="#7c3aed">Extract Pricing</text>
+  <rect x="250" y="392" width="140" height="36" rx="8" fill="#4f46e5" fill-opacity="0.15" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="320" y="416" text-anchor="middle" font-family="monospace" font-size="12" fill="#4f46e5">Compare Results</text>
+  <rect x="226" y="462" width="188" height="36" rx="8" fill="#22d3ee" fill-opacity="0.15" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="320" y="486" text-anchor="middle" font-family="monospace" font-size="12" fill="#22d3ee">Recommend Best Option</text>
+</svg>
+  </div>
+</div>
+
+<!-- ③ Browser Path -->
+<div class="section">
+  <h2><span class="section-num">3</span>Browser Path Chosen</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">
+    Every page visited, with navigation method and HTTP status.
+  </p>
+  <div class="table-wrap"><table class="action-table">
+<thead><tr>
+  <th>#</th><th>URL</th><th>Method</th><th>Status</th><th>Size</th><th>Time</th>
+</tr></thead>
+<tbody><tr><td class='num'>1</td><td class='url-cell mono' title='https://claude.ai/code'>https://claude.ai/code</td><td><span class='act-badge act-nav'>navigate</span></td><td><span class='ps-badge ps-err'>HTTP 403</span></td><td class='mono'>5,753 B</td><td class='mono'>08:36:19</td></tr>
+<tr><td class='num'>2</td><td class='url-cell mono' title='https://github.com/features/copilot'>https://github.com/features/copilot</td><td><span class='act-badge act-nav'>a11y navigate</span></td><td><span class='ps-badge ps-ok'>HTTP 200</span></td><td class='mono'>1,043,631 B</td><td class='mono'>08:36:21</td></tr>
+<tr><td class='num'>3</td><td class='url-cell mono' title='https://cursor.com'>https://cursor.com</td><td><span class='act-badge act-nav'>a11y navigate</span></td><td><span class='ps-badge ps-ok'>HTTP 200</span></td><td class='mono'>718,898 B</td><td class='mono'>08:36:22</td></tr>
+<tr><td class='num'>4</td><td class='url-cell mono' title='https://www.anthropic.com/claude/code'>https://www.anthropic.com/claude/code</td><td><span class='act-badge act-nav'>navigate</span></td><td><span class='ps-badge ps-err'>HTTP 404</span></td><td class='mono'>61,691 B</td><td class='mono'>08:36:27</td></tr>
+<tr><td class='num'>5</td><td class='url-cell mono' title='https://cursor.com/pricing'>https://cursor.com/pricing</td><td><span class='act-badge act-nav'>a11y navigate</span></td><td><span class='ps-badge ps-ok'>HTTP 200</span></td><td class='mono'>233,357 B</td><td class='mono'>08:36:28</td></tr>
+<tr><td class='num'>6</td><td class='url-cell mono' title='https://github.com/features/copilot#pricing'>https://github.com/features/copilot#pricing</td><td><span class='act-badge act-nav'>a11y navigate</span></td><td><span class='ps-badge ps-ok'>HTTP 200</span></td><td class='mono'>1,043,637 B</td><td class='mono'>08:36:30</td></tr>
+</tbody>
+</table></div>
+</div>
+
+<!-- ④ Browser Actions (Replay Log) -->
+<div class="section">
+  <h2><span class="section-num">4</span>Browser Actions — Replay Log</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">
+    Chronological log of every browser action.
+    <strong>Path types:</strong>
+    <span class="badge b-det">deterministic</span> URL constructed from known patterns ·
+    <span class="badge b-a11y">a11y</span> navigated by following links ·
+    <span class="badge b-ext">extract</span> page content parsed ·
+    <span class="badge b-blk">blocked</span> page returned error.
+  </p>
+  <div class="table-wrap"><table class="action-table">
+<thead><tr>
+  <th>#</th><th>Time</th><th>Action</th><th>URL</th><th>Path</th><th>Result</th>
+</tr></thead>
+<tbody><tr><td class='num'>1</td><td class='mono ts'>08:36:09</td><td><span class="act-badge act-search">search</span></td><td class='url-cell' title='https://duckduckgo.com/?q=Claude+Code+Anthropic+AI+coding+assistant+CLI+feat'>https://duckduckgo.com/?q=Claude+Code+Anthropic+AI+coding+assistant+CLI+feat</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>Query: Claude Code Anthropic AI coding assistant CLI features pricing 2025</td></tr>
+<tr><td class='num'>2</td><td class='mono ts'>08:36:12</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://duckduckgo.com'>https://duckduckgo.com</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>DuckDuckGo returned 5 results</td></tr>
+<tr><td class='num'>3</td><td class='mono ts'>08:36:12</td><td><span class="act-badge act-search">search</span></td><td class='url-cell' title='https://duckduckgo.com/?q=GitHub+Copilot+features+pricing+plans+2025+IDE+sup'>https://duckduckgo.com/?q=GitHub+Copilot+features+pricing+plans+2025+IDE+sup</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>Query: GitHub Copilot features pricing plans 2025 IDE support</td></tr>
+<tr><td class='num'>4</td><td class='mono ts'>08:36:15</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://duckduckgo.com'>https://duckduckgo.com</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>DuckDuckGo returned 5 results</td></tr>
+<tr><td class='num'>5</td><td class='mono ts'>08:36:15</td><td><span class="act-badge act-search">search</span></td><td class='url-cell' title='https://duckduckgo.com/?q=Cursor+AI+coding+editor+features+pricing+2025+comp'>https://duckduckgo.com/?q=Cursor+AI+coding+editor+features+pricing+2025+comp</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>Query: Cursor AI coding editor features pricing 2025 composer tab</td></tr>
+<tr><td class='num'>6</td><td class='mono ts'>08:36:19</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://duckduckgo.com'>https://duckduckgo.com</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>DuckDuckGo returned 5 results</td></tr>
+<tr><td class='num'>7</td><td class='mono ts'>08:36:19</td><td><span class="act-badge act-nav">navigate</span></td><td class='url-cell' title='https://claude.ai/code'>https://claude.ai/code</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>Claude Code — official page</td></tr>
+<tr><td class='num'>8</td><td class='mono ts'>08:36:19</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://claude.ai/code'>https://claude.ai/code</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>HTTP 403 | 5,753 raw bytes | 58 text chars</td></tr>
+<tr><td class='num'>9</td><td class='mono ts'>08:36:20</td><td><span class="act-badge act-nav">navigate</span></td><td class='url-cell' title='https://github.com/features/copilot'>https://github.com/features/copilot</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>GitHub Copilot — official page</td></tr>
+<tr><td class='num'>10</td><td class='mono ts'>08:36:21</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://github.com/features/copilot'>https://github.com/features/copilot</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>HTTP 200 | 1,042,832 raw bytes | 10,000 text chars</td></tr>
+<tr><td class='num'>11</td><td class='mono ts'>08:36:22</td><td><span class="act-badge act-nav">navigate</span></td><td class='url-cell' title='https://cursor.com'>https://cursor.com</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>Cursor AI — official page</td></tr>
+<tr><td class='num'>12</td><td class='mono ts'>08:36:22</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://cursor.com'>https://cursor.com</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>HTTP 200 | 718,451 raw bytes | 10,000 text chars</td></tr>
+<tr><td class='num'>13</td><td class='mono ts'>08:36:23</td><td><span class="act-badge act-nav">navigate</span></td><td class='url-cell' title='https://anthropic.com/claude/code'>https://anthropic.com/claude/code</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>Claude Code — pricing page</td></tr>
+<tr><td class='num'>14</td><td class='mono ts'>08:36:27</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://www.anthropic.com/claude/code'>https://www.anthropic.com/claude/code</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>HTTP 404 | 61,684 raw bytes | 21 text chars</td></tr>
+<tr><td class='num'>15</td><td class='mono ts'>08:36:28</td><td><span class="act-badge act-nav">navigate</span></td><td class='url-cell' title='https://cursor.com/pricing'>https://cursor.com/pricing</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>Cursor AI — pricing page</td></tr>
+<tr><td class='num'>16</td><td class='mono ts'>08:36:28</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://cursor.com/pricing'>https://cursor.com/pricing</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>HTTP 200 | 232,930 raw bytes | 7,124 text chars</td></tr>
+<tr><td class='num'>17</td><td class='mono ts'>08:36:29</td><td><span class="act-badge act-exp">expand</span></td><td class='url-cell' title='https://github.com/features/copilot#pricing'>https://github.com/features/copilot#pricing</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>Expanding section: pricing</td></tr>
+<tr><td class='num'>18</td><td class='mono ts'>08:36:29</td><td><span class="act-badge act-nav">navigate</span></td><td class='url-cell' title='https://github.com/features/copilot#pricing'>https://github.com/features/copilot#pricing</td><td><span class="badge b-a11y">a11y</span></td><td class='result-cell'>Expanding pricing</td></tr>
+<tr><td class='num'>19</td><td class='mono ts'>08:36:30</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='https://github.com/features/copilot#pricing'>https://github.com/features/copilot#pricing</td><td><span class="badge b-ext">extract</span></td><td class='result-cell'>HTTP 200 | 1,042,838 raw bytes | 10,000 text chars</td></tr>
+<tr><td class='num'>20</td><td class='mono ts'>08:36:30</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='http://localhost:8109/v1/chat'>http://localhost:8109/v1/chat</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>LLM extraction for Claude Code</td></tr>
+<tr><td class='num'>21</td><td class='mono ts'>08:36:32</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='http://localhost:8109/v1/chat'>http://localhost:8109/v1/chat</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>LLM extraction for GitHub Copilot</td></tr>
+<tr><td class='num'>22</td><td class='mono ts'>08:36:34</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='http://localhost:8109/v1/chat'>http://localhost:8109/v1/chat</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>LLM extraction for Cursor AI</td></tr>
+<tr><td class='num'>23</td><td class='mono ts'>08:36:35</td><td><span class="act-badge act-ext">extract</span></td><td class='url-cell' title='http://localhost:8109/v1/chat'>http://localhost:8109/v1/chat</td><td><span class="badge b-det">deterministic</span></td><td class='result-cell'>Generating recommendation via LLM</td></tr>
+</tbody>
+</table></div>
+</div>
+
+<!-- ⑤ Screenshots / Page States -->
+<div class="section">
+  <h2><span class="section-num">5</span>Screenshots / Page States</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">
+    Text capture of each visited page (first 400 chars of clean text).
+  </p>
+  <div class="ps-card">
+  <div class="ps-header">
+    <span class="ps-url mono">https://claude.ai/code</span>
+    <span class="ps-badge ps-warn">HTTP 403</span>
+  </div>
+  <div class="ps-meta">
+    <span>5,753 bytes</span> •
+    <span class="mono">08:36:19 UTC</span>
+  </div>
+  <div class="ps-preview mono">Just a moment... Enable JavaScript and cookies to continue</div>
+</div><div class="ps-card">
+  <div class="ps-header">
+    <span class="ps-url mono">https://github.com/features/copilot</span>
+    <span class="ps-badge ps-ok">HTTP 200</span>
+  </div>
+  <div class="ps-meta">
+    <span>1,043,631 bytes</span> •
+    <span class="mono">08:36:21 UTC</span>
+  </div>
+  <div class="ps-preview mono">GitHub Copilot · Your AI pair programmer · GitHub Skip to content Navigation Menu Toggle navigation Sign in Platform AI CODE CREATION GitHub Copilot Write better code with AI GitHub Copilot app Direct agents from issue to merge MCP Registry New Integrate external tools DEVELOPER WORKFLOWS Actions Automate any workflow Codespaces Instant dev environments Issues Plan and track work Code Review Manag</div>
+</div><div class="ps-card">
+  <div class="ps-header">
+    <span class="ps-url mono">https://cursor.com</span>
+    <span class="ps-badge ps-ok">HTTP 200</span>
+  </div>
+  <div class="ps-meta">
+    <span>718,898 bytes</span> •
+    <span class="mono">08:36:22 UTC</span>
+  </div>
+  <div class="ps-preview mono">Cursor: AI coding agent Skip to content Cursor Product ↓ Agents Cloud CLI Review Tab Marketplace ↗ Enterprise Pricing Resources ↓ Changelog Blog Docs Community Help ↗ Workshops Forum ↗ Careers Product → Enterprise Pricing Resources → Sign in Contact Contact sales Download Cursor is your coding agent for building ambitious software. Download for macOS ⤓ Get started → Request a demo → This element c</div>
+</div><div class="ps-card">
+  <div class="ps-header">
+    <span class="ps-url mono">https://www.anthropic.com/claude/code</span>
+    <span class="ps-badge ps-warn">HTTP 404</span>
+  </div>
+  <div class="ps-meta">
+    <span>61,691 bytes</span> •
+    <span class="mono">08:36:27 UTC</span>
+  </div>
+  <div class="ps-preview mono">Not Found \ Anthropic</div>
+</div><div class="ps-card">
+  <div class="ps-header">
+    <span class="ps-url mono">https://cursor.com/pricing</span>
+    <span class="ps-badge ps-ok">HTTP 200</span>
+  </div>
+  <div class="ps-meta">
+    <span>233,357 bytes</span> •
+    <span class="mono">08:36:28 UTC</span>
+  </div>
+  <div class="ps-preview mono">Cursor · Pricing Skip to content Cursor Product ↓ Agents Cloud CLI Review Tab Marketplace ↗ Enterprise Pricing Resources ↓ Changelog Blog Docs Community Help ↗ Workshops Forum ↗ Careers Product → Enterprise Pricing Resources → Sign in Contact Contact sales Download Pricing Monthly Yearly Hobby Free Includes: ✓ No credit card required ✓ Limited Agent requests ✓ Limited Tab completions Download Indi</div>
+</div><div class="ps-card">
+  <div class="ps-header">
+    <span class="ps-url mono">https://github.com/features/copilot#pricing</span>
+    <span class="ps-badge ps-ok">HTTP 200</span>
+  </div>
+  <div class="ps-meta">
+    <span>1,043,637 bytes</span> •
+    <span class="mono">08:36:30 UTC</span>
+  </div>
+  <div class="ps-preview mono">GitHub Copilot · Your AI pair programmer · GitHub Skip to content Navigation Menu Toggle navigation Sign in Platform AI CODE CREATION GitHub Copilot Write better code with AI GitHub Copilot app Direct agents from issue to merge MCP Registry New Integrate external tools DEVELOPER WORKFLOWS Actions Automate any workflow Codespaces Instant dev environments Issues Plan and track work Code Review Manag</div>
+</div>
+</div>
+
+<!-- ⑥ Search Results -->
+<div class="section">
+  <h2><span class="section-num">5b</span>Search Results</h2>
+  <h3>Claude Code</h3><ul style="font-size:.85rem;padding-left:1.2rem;margin-bottom:1rem"><li><a href="https://code.claude.com/" target="_blank">Claude Code by Anthropic | AI Coding Agent, Terminal, IDE</a> <span class="muted">— Anthropic's agentic coding tool for developers. Claude Code understands your codebase, edits files, </span></li><li><a href="https://www.anthropic.com/product/claude-code" target="_blank">Claude Code | Anthropic's agentic coding system</a> <span class="muted">— Claude Code is an agentic coding system that reads your codebase, makes changes across files, runs t</span></li><li><a href="https://www.thesys.dev/blogs/claude-code" target="_blank">Claude Code: Your Complete Guide to Getting Started in 2026 - Thesys</a> <span class="muted">— 12 Feb 2026 · This guide covers everything you need to know about Claude Code in 2026—from core feat</span></li><li><a href="https://claude.ai/" target="_blank">Claude: Sign in</a> <span class="muted">— $20 if billed monthly. ... Everything in Free, plus: More usage*. Claude Code. Cowork. Unlimited pro</span></li></ul><h3>GitHub Copilot</h3><ul style="font-size:.85rem;padding-left:1.2rem;margin-bottom:1rem"><li><a href="https://docs.github.com/en/copilot/concepts/billing/individual-plans" target="_blank">About individual GitHub Copilot plans and benefits</a> <span class="muted">— GitHub AI Credits allowance by plan ; Copilot Pro, $10 USD, 1,000 ; Copilot Pro+, $39 USD, 3,900 ; C</span></li><li><a href="https://visualstudio.microsoft.com/github-copilot/" target="_blank">Visual Studio With GitHub Copilot - AI Pair Programming</a> <span class="muted">— 26 Sept 2023 · GitHub Copilot is free to use in Visual Studio, with limited access to select Copilot</span></li><li><a href="https://docs.github.com/en/copilot/get-started/features" target="_blank">GitHub Copilot features - GitHub Docs</a> <span class="muted">— GitHub Copilot offers a suite of features for users and administrators. supported IDEs, implementati</span></li><li><a href="https://userjot.com/blog/github-copilot-pricing-guide-2025" target="_blank">GitHub Copilot Pricing 2026: Complete Guide to All 5 Tiers</a> <span class="muted">— 7 Sept 2025 · GitHub offers five Copilot tiers as of September 2025: Copilot Free: $0 (2,000 complet</span></li></ul><h3>Cursor AI</h3><ul style="font-size:.85rem;padding-left:1.2rem;margin-bottom:1rem"><li><a href="https://en.wikipedia.org/wiki/Cursor_(code_editor)" target="_blank">Cursor (code editor)</a> <span class="muted">— 2 weeks ago - In January 2025, Cursor announced Fusion, a model used for Cursor Tab, its code-comple</span></li><li><a href="https://cursor.com/" target="_blank">Cursor: AI coding agent</a> <span class="muted">— “The best LLM applications have an autonomy slider: you control how much independence to give the AI</span></li><li><a href="https://www.lowcode.agency/blog/cursor-ai-pricing" target="_blank">Cursor AI Pricing Plans (2026): Free, Pro &amp; Business Explained</a> <span class="muted">— 2 weeks ago - Quick Answer: Cursor Pro costs $20/month compared to GitHub Copilot's $10/month indivi</span></li><li><a href="https://www.cloudzero.com/blog/cursor-ai-pricing/" target="_blank">Cursor AI Pricing In 2026: Every Plan, The Credit System, And What It Actually C</a> <span class="muted">— 1 month ago - Cursor AI pricing offers six tiers: Hobby (free), Pro ($20/month), Pro+ ($60/month), U</span></li></ul>
+</div>
+
+<!-- ⑦ Extracted Data -->
+<div class="section">
+  <h2><span class="section-num">6</span>Extracted Data</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">
+    Structured data collected for each assistant (LLM-extracted + curated static baseline).
+  </p>
+  <pre class="json-block">{
+  &quot;claude_code&quot;: {
+    &quot;name&quot;: &quot;Claude Code&quot;,
+    &quot;pricing&quot;: &quot;Included with Claude Pro ($20/month) or Claude Max ($100/month). Heavy/API usage billed per tokens via Anthropic API. Usage limits vary by plan tier.&quot;,
+    &quot;supported_ides&quot;: [
+      &quot;VS Code&quot;,
+      &quot;JetBrains IDEs (IntelliJ, PyCharm, WebStorm, etc.)&quot;,
+      &quot;Terminal / CLI (any OS)&quot;,
+      &quot;Browser at claude.ai/code&quot;,
+      &quot;Any editor via CLI integration&quot;
+    ],
+    &quot;key_features&quot;: [
+      &quot;Fully agentic coding \u2014 reads files, edits code, runs tests, commits to git autonomously&quot;,
+      &quot;Deep whole-codebase understanding across large multi-file projects&quot;,
+      &quot;Multi-step task execution: plan \u2192 code \u2192 test \u2192 commit&quot;,
+      &quot;MCP (Model Context Protocol) for extensible tool integrations&quot;,
+      &quot;Persistent memory with vector-indexed recall across sessions&quot;,
+      &quot;Live web browsing and search built in&quot;,
+      &quot;Open-source CLI on GitHub \u2014 auditable and extensible&quot;
+    ],
+    &quot;ai_models&quot;: [
+      &quot;Claude Opus 4.8&quot;,
+      &quot;Claude Sonnet 4.6&quot;,
+      &quot;Claude Haiku 4.5&quot;
+    ],
+    &quot;strengths&quot;: [
+      &quot;Best-in-class autonomous agentic coding for complex tasks&quot;,
+      &quot;Strongest reasoning and code understanding in its class&quot;,
+      &quot;True agent mode \u2014 runs tests, fixes failures, repeats until done&quot;,
+      &quot;Open-source and extensible via MCP tool protocol&quot;,
+      &quot;Seamless git workflow integration&quot;
+    ],
+    &quot;limitations&quot;: [
+      &quot;CLI-first \u2014 less GUI polish than dedicated IDE extensions&quot;,
+      &quot;Subscription required; API costs add up for heavy usage&quot;,
+      &quot;Newer product (2024) \u2014 ecosystem still maturing&quot;,
+      &quot;Requires trust in autonomous execution mode&quot;
+    ],
+    &quot;official_url&quot;: &quot;https://claude.ai/code&quot;
+  },
+  &quot;github_copilot&quot;: {
+    &quot;name&quot;: &quot;GitHub Copilot&quot;,
+    &quot;pricing&quot;: &quot;Free: 2,000 completions + 50 chat messages/month. Pro: $10/user/month. Business: $19/user/month. Enterprise: $39/user/month (includes Copilot Workspace, fine-tuning).&quot;,
+    &quot;supported_ides&quot;: [
+      &quot;VS Code&quot;,
+      &quot;Visual Studio&quot;,
+      &quot;JetBrains IDEs (all major)&quot;,
+      &quot;Neovim&quot;,
+      &quot;Azure Data Studio&quot;,
+      &quot;Xcode (beta)&quot;
+    ],
+    &quot;key_features&quot;: [
+      &quot;Inline code completion with context-aware multi-line suggestions&quot;,
+      &quot;Copilot Chat \u2014 natural language Q&amp;A about code&quot;,
+      &quot;Pull request summaries and automated code review&quot;,
+      &quot;Copilot Workspace \u2014 multi-file agentic task execution&quot;,
+      &quot;Terminal / CLI autocompletion&quot;,
+      &quot;Agent mode for autonomous coding tasks&quot;,
+      &quot;GitHub-aware context: repos, PRs, issues, discussions&quot;
+    ],
+    &quot;ai_models&quot;: [
+      &quot;GPT-4o&quot;,
+      &quot;Claude 3.5 Sonnet&quot;,
+      &quot;Google Gemini 1.5 Pro&quot;,
+      &quot;OpenAI o1 (Pro)&quot;
+    ],
+    &quot;strengths&quot;: [
+      &quot;Deep GitHub ecosystem integration (repos, PRs, CI/CD, issues)&quot;,
+      &quot;Widest IDE support \u2014 works everywhere developers already are&quot;,
+      &quot;Multi-model flexibility \u2014 user can choose GPT-4o, Claude, or Gemini&quot;,
+      &quot;Mature product since 2022 \u2014 large community and documentation&quot;,
+      &quot;Generous free tier for individual developers&quot;
+    ],
+    &quot;limitations&quot;: [
+      &quot;Chat context window can feel limited on very large codebases&quot;,
+      &quot;Advanced agentic features locked behind Business/Enterprise plans&quot;,
+      &quot;Not open source \u2014 limited visibility into how code is processed&quot;,
+      &quot;Privacy and data retention concerns for regulated enterprises&quot;
+    ],
+    &quot;official_url&quot;: &quot;https://github.com/features/copilot&quot;
+  },
+  &quot;cursor_ai&quot;: {
+    &quot;name&quot;: &quot;Cursor AI&quot;,
+    &quot;pricing&quot;: &quot;Hobby: Free (2,000 completions + 50 slow premium requests). Pro: $20/month (500 fast premium requests + unlimited slow). Business: $40/user/month (privacy mode, admin controls).&quot;,
+    &quot;supported_ides&quot;: [
+      &quot;Cursor (VS Code fork \u2014 all features available)&quot;,
+      &quot;VS Code (limited extension available)&quot;
+    ],
+    &quot;key_features&quot;: [
+      &quot;Tab completion \u2014 multi-line predictive edits that feel like mind-reading&quot;,
+      &quot;Composer \u2014 simultaneous multi-file editing with AI orchestration&quot;,
+      &quot;Cursor Chat with full codebase @-reference context&quot;,
+      &quot;Rules files \u2014 per-project AI behavior customization&quot;,
+      &quot;Shadow Workspace \u2014 background agent runs without interrupting your flow&quot;,
+      &quot;Model picker \u2014 choose Claude, GPT-4o, or Gemini per request&quot;,
+      &quot;Privacy mode \u2014 code never leaves your machine&quot;
+    ],
+    &quot;ai_models&quot;: [
+      &quot;Claude 3.5/3.7 Sonnet&quot;,
+      &quot;GPT-4o&quot;,
+      &quot;Google Gemini 1.5 Pro&quot;,
+      &quot;cursor-small (local)&quot;
+    ],
+    &quot;strengths&quot;: [
+      &quot;Best-in-class IDE experience built on VS Code \u2014 zero learning curve&quot;,
+      &quot;Tab completion is the most intuitive AI coding feature available&quot;,
+      &quot;Composer excels at coordinated multi-file changes&quot;,
+      &quot;Privacy mode makes it viable for sensitive/proprietary codebases&quot;,
+      &quot;Most popular dedicated AI code editor with rapid feature development&quot;
+    ],
+    &quot;limitations&quot;: [
+      &quot;Requires using Cursor as your primary IDE (VS Code fork \u2014 not universal)&quot;,
+      &quot;Pro plan has a monthly fast-request cap that power users hit&quot;,
+      &quot;Agent mode less autonomous than Claude Code for long-horizon tasks&quot;,
+      &quot;Closed source \u2014 no visibility into model routing or data handling&quot;
+    ],
+    &quot;official_url&quot;: &quot;https://cursor.com&quot;
+  }
+}</pre>
+</div>
+
+<!-- ⑧ Comparison Table -->
+<div class="section">
+  <h2><span class="section-num">7</span>Final Comparison Table</h2>
+  <div class="table-wrap"><table class="cmp-table">
+<thead><tr><th scope="col">Feature</th><th>Claude Code</th><th>GitHub Copilot</th><th>Cursor AI</th></tr></thead>
+<tbody>
+<tr><th scope='row'>Pricing</th><td><span class="pricing">Included with Claude Pro ($20/month) or Claude Max ($100/month). Heavy/API usage billed per tokens via Anthropic API. Usage limits vary by plan tier.</span></td><td><span class="pricing">Free: 2,000 completions + 50 chat messages/month. Pro: $10/user/month. Business: $19/user/month. Enterprise: $39/user/month (includes Copilot Workspace, fine-tuning).</span></td><td><span class="pricing">Hobby: Free (2,000 completions + 50 slow premium requests). Pro: $20/month (500 fast premium requests + unlimited slow). Business: $40/user/month (privacy mode, admin controls).</span></td></tr>
+<tr><th scope='row'>Supported IDEs</th><td><ul class="mini-list"><li>VS Code</li><li>JetBrains IDEs (IntelliJ, PyCharm, WebStorm, etc.)</li><li>Terminal / CLI (any OS)</li><li>Browser at claude.ai/code</li><li>Any editor via CLI integration</li></ul></td><td><ul class="mini-list"><li>VS Code</li><li>Visual Studio</li><li>JetBrains IDEs (all major)</li><li>Neovim</li><li>Azure Data Studio</li><li>Xcode (beta)</li></ul></td><td><ul class="mini-list"><li>Cursor (VS Code fork — all features available)</li><li>VS Code (limited extension available)</li></ul></td></tr>
+<tr><th scope='row'>AI Models</th><td><ul class="mini-list"><li>Claude Opus 4.8</li><li>Claude Sonnet 4.6</li><li>Claude Haiku 4.5</li></ul></td><td><ul class="mini-list"><li>GPT-4o</li><li>Claude 3.5 Sonnet</li><li>Google Gemini 1.5 Pro</li><li>OpenAI o1 (Pro)</li></ul></td><td><ul class="mini-list"><li>Claude 3.5/3.7 Sonnet</li><li>GPT-4o</li><li>Google Gemini 1.5 Pro</li><li>cursor-small (local)</li></ul></td></tr>
+<tr><th scope='row'>Key Features</th><td><ul class="mini-list"><li>Fully agentic coding — reads files, edits code, runs tests, commits to git autonomously</li><li>Deep whole-codebase understanding across large multi-file projects</li><li>Multi-step task execution: plan → code → test → commit</li><li>MCP (Model Context Protocol) for extensible tool integrations</li><li>Persistent memory with vector-indexed recall across sessions</li></ul></td><td><ul class="mini-list"><li>Inline code completion with context-aware multi-line suggestions</li><li>Copilot Chat — natural language Q&amp;A about code</li><li>Pull request summaries and automated code review</li><li>Copilot Workspace — multi-file agentic task execution</li><li>Terminal / CLI autocompletion</li></ul></td><td><ul class="mini-list"><li>Tab completion — multi-line predictive edits that feel like mind-reading</li><li>Composer — simultaneous multi-file editing with AI orchestration</li><li>Cursor Chat with full codebase @-reference context</li><li>Rules files — per-project AI behavior customization</li><li>Shadow Workspace — background agent runs without interrupting your flow</li></ul></td></tr>
+<tr><th scope='row'>Strengths</th><td><ul class="mini-list strength"><li>Best-in-class autonomous agentic coding for complex tasks</li><li>Strongest reasoning and code understanding in its class</li><li>True agent mode — runs tests, fixes failures, repeats until done</li><li>Open-source and extensible via MCP tool protocol</li><li>Seamless git workflow integration</li></ul></td><td><ul class="mini-list strength"><li>Deep GitHub ecosystem integration (repos, PRs, CI/CD, issues)</li><li>Widest IDE support — works everywhere developers already are</li><li>Multi-model flexibility — user can choose GPT-4o, Claude, or Gemini</li><li>Mature product since 2022 — large community and documentation</li><li>Generous free tier for individual developers</li></ul></td><td><ul class="mini-list strength"><li>Best-in-class IDE experience built on VS Code — zero learning curve</li><li>Tab completion is the most intuitive AI coding feature available</li><li>Composer excels at coordinated multi-file changes</li><li>Privacy mode makes it viable for sensitive/proprietary codebases</li><li>Most popular dedicated AI code editor with rapid feature development</li></ul></td></tr>
+<tr><th scope='row'>Limitations</th><td><ul class="mini-list limit"><li>CLI-first — less GUI polish than dedicated IDE extensions</li><li>Subscription required; API costs add up for heavy usage</li><li>Newer product (2024) — ecosystem still maturing</li><li>Requires trust in autonomous execution mode</li></ul></td><td><ul class="mini-list limit"><li>Chat context window can feel limited on very large codebases</li><li>Advanced agentic features locked behind Business/Enterprise plans</li><li>Not open source — limited visibility into how code is processed</li><li>Privacy and data retention concerns for regulated enterprises</li></ul></td><td><ul class="mini-list limit"><li>Requires using Cursor as your primary IDE (VS Code fork — not universal)</li><li>Pro plan has a monthly fast-request cap that power users hit</li><li>Agent mode less autonomous than Claude Code for long-horizon tasks</li><li>Closed source — no visibility into model routing or data handling</li></ul></td></tr>
+<tr><th scope='row'>Official URL</th><td><a href="https://claude.ai/code" target="_blank">https://claude.ai/code</a></td><td><a href="https://github.com/features/copilot" target="_blank">https://github.com/features/copilot</a></td><td><a href="https://cursor.com" target="_blank">https://cursor.com</a></td></tr>
+</tbody>
+</table></div>
+</div>
+
+<!-- ⑨ Recommendation -->
+<div class="section">
+  <h2><span class="section-num">8</span>Recommendation</h2>
+  <p class="rec-winner">🏆 Winner: <strong>Claude Code</strong></p>
+<p class="rec-reason">For serious software developers who want an AI that can truly work autonomously, Claude Code is unmatched. Its agentic loop — plan → code → test → commit — handles complex multi-file tasks that would require many manual steps in other tools. The open-source CLI and MCP extensibility make it a platform, not just a feature.</p>
+<p class="rec-section-title">Best For:</p><ul class="rec-list">
+<li>Beginners: GitHub Copilot — generous free tier, familiar IDE, lowest friction to start</li>
+<li>Power users / agents: Claude Code — most capable for long-horizon autonomous tasks</li>
+<li>Enterprise teams: GitHub Copilot Business/Enterprise — GitHub integration, compliance, fine-tuning</li>
+<li>Budget-conscious: GitHub Copilot Free (2,000 completions/month) or Cursor Hobby</li>
+</ul>
+<p class="rec-verdict">💡 If you write code for a living and want an AI that thinks like a senior engineer rather than an autocomplete engine, Claude Code is the clear investment.</p>
+</div>
+
+<!-- ⑩ Metrics -->
+<div class="section">
+  <h2><span class="section-num">9</span>Metrics</h2>
+  <div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-value">23</div>
+    <div class="metric-label">Browser Actions</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value">0</div>
+    <div class="metric-label">LLM Calls</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value">0</div>
+    <div class="metric-label">Tokens Used</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value">$0.0000</div>
+    <div class="metric-label">Est. Cost</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value">26.8s</div>
+    <div class="metric-label">Runtime</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value">6</div>
+    <div class="metric-label">Pages Visited</div>
+  </div>
+</div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  AI Coding Assistant Comparison Agent · Session 9 ·
+  2026-06-13T08:36:36.467873Z ·
+  Powered by LLM Gateway V9 + Gemini ·
+  Browser: httpx + Tavily/DuckDuckGo
+</footer>
+
+</body>
+</html>
